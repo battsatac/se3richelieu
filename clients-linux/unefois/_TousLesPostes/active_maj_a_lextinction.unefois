@@ -2,7 +2,7 @@
 # Script de déploiement d'une solution de mise à jour de la machine lorsque celle-ci s'éteint
 # TODO : ajouter traitement dans le cas où systemd n'existe pas sur la machine ? 
 
-SCRIPT="/root/maj_poste"    # nom de fichier du script
+SCRIPT="/root/maj_poste"        # nom de fichier du script
 SERVICENAME="se3_maj_at_halt"   # nom du service systemd associé
 
 
