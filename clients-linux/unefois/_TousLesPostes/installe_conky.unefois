@@ -1,0 +1,16 @@
+#!/bin/bash
+CODENAME=$(lsb_release -c -s)
+
+if [ "${CODENAME}" = "jessie" ]; then
+
+    cat > /etc/apt/sources.list.d/${CODENAME}-backports.list<<EOF
+deb http://ftp.debian.org/debian ${CODENAME}-backports main
+EOF
+    apt-get update && apt-get install -y -t ${CODENAME}-backports conky-all
+
+else
+
+    apt-get install -y conky
+
+fi
+

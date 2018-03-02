@@ -1,0 +1,4 @@
+#!/bin/bash
+rm -f /etc/apt/sources.list.d/jessie_backports.list
+rm -f /etc/apt/sources.list.d/libreoffice.list
+

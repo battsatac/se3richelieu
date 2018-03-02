@@ -1,0 +1,3 @@
+#!/bin/sh
+# Pour une raison obscure les clefs publiques apparaissent dans la racine des clients xenial déployés !
+rm -f /*.pub /authorized_keys

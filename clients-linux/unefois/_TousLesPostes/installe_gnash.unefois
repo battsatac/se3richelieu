@@ -1,0 +1,30 @@
+#!/bin/bash
+CODENAME="$(lsb_release -cs)"
+PROGRAM="gnash"
+LINESEP="#############################################################"
+LINESTART="######### "
+
+# Installation de gnash pour la lectur de fichiers swf (pour le collègue de SI)
+
+echo -e "${LINESEP}\n\t\tInstallation de ${PROGRAM}\n${LINESEP}"
+echo "proxy = $(env | grep -i http)"
+
+# Boucle d'attente de la fin d'un éventuel processus dpkg
+while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    # inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
+    echo "$(date) : En attente de la fin de dpkg"
+    sleep 30
+done
+
+case "${CODENAME}" in
+    "jessie"|"xenial"|"stretch")
+        echo -e "${LINESTART}Nom de code de la distribution : ${CODENAME}"
+        apt-get install -y ${PROGRAM}
+        ;;
+    *)
+        echo -e "${LINESTART}Nom de code ${CODENAME} inconnu, on tente une installation via un paquet"
+        apt-get install -y ${PROGRAM} 
+        ;;
+esac  
+
+echo -e "${LINESEP}\n\t\tFin de l'installation de ${PROGRAM}\n${LINESEP}"

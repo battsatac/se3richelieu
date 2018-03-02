@@ -1,0 +1,24 @@
+#!/bin/bash
+CODENAME="$(lsb_release -cs)"
+PROGRAM="freeplane"
+
+echo "proxy = $(env | grep -i http)"
+
+case "${CODENAME}" in
+    "jessie")
+        # Freeplane est installé par défaut sur Debian
+        ;;
+    "xenial")
+        apt-get install -y ${PROGRAM}
+        # sudo -H python3 -m pip install --index-url=http://pypi.python.org/simple/ --trusted-host pypi.python.org pyzolib pyzo --upgrade
+        # python3 -m pip install --upgrade pip 
+        ;;
+    "stretch")
+        ;;
+    *)
+        echo "Nom de code ${CODENAME} inconnu, on tente une installation via un paquet"
+        apt-get install -y ${PROGRAM} 
+        ;;
+esac  
+
+echo "Fin de l'installation de ${PROGRAM}"
