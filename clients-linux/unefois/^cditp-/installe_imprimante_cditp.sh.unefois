@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# TODO 1 : prévoir ce qu'il se passe si une imprimante du même nom existe déjà...
+# TODO 2 : plutot qu'attendre un temps arbitraire, attendre que CUPS démarre
+
+##################################################
+# Variables à adapter
+##################################################
+printer_name="Lexmark-e260DN"
+printer_room="CDITP"
+printer_IP="172.20.200.23"
+printer_ppd="Lexmark-E260dn-Postscript-Lexmark.ppd"
+printer_is_default="yes"
+
+
+##################################################
+# Ne plus modifier les variables à partir d'ici
+################################################## 
+ppd_directory="/mnt/netlogon/divers/imprimantes"
+printer_friendly_name="${printer_room}-${printer_name}"
+printer_ppd_path="${ppd_directory}/${printer_ppd}"
+# Temporisation destinée à laisser le temps au service CUPS de démarrer
+sleep_delay="30s"
+
+
+echo "On attend ${sleep_delay} le démarrage du service CUPS..."
+sleep ${sleep_delay}
+
+echo "État du service CUPS : `service cups status`"
+
+if [ ! -f ${printer_ppd_path} ]; then
+    echo -e "Fichier de pilote d'imprimante manquant :\n${printer_ppd_path}"
+else
+    echo -e "Fichier de pilote d'imprimante présent.\nInstallation de l'imprimante ${printer_friendly_name}"
+    # Ajout de l'imprimante
+    lpadmin -p ${printer_friendly_name} -L ${printer_room} -v socket://${printer_IP}:9100 -E -P ${printer_ppd_path}
+
+   # Définition comme imprimante par défaut le cas échéant
+    if [ "${printer_is_default}" = "yes" ]; then
+        echo "Déclaration de ${printer_friendly_name} comme imprimante par défaut."
+        lpadmin -d ${printer_friendly_name}
+    fi
+fi
+
+# D'après https://github.com/SambaEdu/se3-docs/blob/master/se3-clients-linux/imprimantes.md
+
+# pour supprimer l'imprimante: 
+# lpadmin -x NOM-IMPRIMANTE
+
+# Pour lister les imprimantes installées sur le poste, afin de retouver par exemple leur nom :
+# lpstat -p
+
+# Récupérer la liste des paramètres d'impression disponibles :
+# lpoptions -p NOM-IMPRIMANTE -l
+# Pour modifier ce paramètre, on lancera la commande suivante (par exemple avec un script unefois agissant sur un parc déterminé) :
+# lpadmin -p HL3170CDW -o "BRMonoColor=Mono"
+

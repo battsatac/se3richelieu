@@ -1,0 +1,26 @@
+#!/bin/bash
+CODENAME="$(lsb_release -cs)"
+
+
+echo "proxy = $(env | grep -i http)"
+
+case "${CODENAME}" in
+    "jessie")
+        apt-get install -y python3-pip python3-pyqt4 && python3 -m pip install pyzo --upgrade
+        ;;
+    "xenial")
+        apt-get install -y python3-pyqt4 python3-pip 
+        pip3 install pyzolib pyzo
+#        sudo -H python3 -m pip install --index-url=http://pypi.python.org/simple/ --trusted-host pypi.python.org pyzolib pyzo --upgrade
+#        python3 -m pip install --upgrade pip 
+        ;;
+    "stretch")
+        apt-get install -y pyzo
+        ;;
+    *)
+        echo "Nom de code ${CODENAME} inconnu, on tente une installation via un paquet"
+        apt-get install -y pyzo
+        ;;
+esac  
+
+echo "Fin de l'installation de Pyzo"

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#####	##### ##### #####
+#
+# Script permettant de mettre à jour flashplugin
+#
+# version du 14/12/2014
+#
+#
+#
+#####	##### ##### #####
+
+# recup proxy si existant pour https
+
+if [ -e /etc/proxy.sh ]; then
+	. /etc/proxy.sh 
+fi
+
+
+# on met à jour flashplugin
+update-flashplugin-nonfree --install
+
+# fin du script
+#####
+

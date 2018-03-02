@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "deb http://repository.crdp.ac-versailles.fr/debian xia main" | tee /etc/apt/sources.list.d/xia.list
+
+wget -q http://repository.crdp.ac-versailles.fr/crdp.gpg -O - | apt-key add -
+
+apt-get update && apt-get install -y xia
+
+echo "Installation de Xia terminée"  

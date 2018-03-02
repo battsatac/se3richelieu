@@ -1,0 +1,15 @@
+#!/bin/sh
+
+
+# Rétablissement paramètres corrects pour PAM
+sed -i.use_authtok -e "s/use_authtok\ //" /etc/pam.d/common-password
+
+# Réactivation du compte enseignant et modification du mot de passe
+newpass="margewasgod"
+# oldpass="enseignant"
+account="enseignant"
+usermod --expiredate "" ${account} && echo `echo "${account}:${newpass}" | chpasswd`
+
+# Ancienne méthode :
+# echo -e "${oldpass}\n${newpass}\n${newpass}" | passwd ${account}
+

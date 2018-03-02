@@ -1,0 +1,8 @@
+#!/bin/bash
+# opération réitériée cause conflit avec une autre installation...
+apt-get remove --purge geogebra
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C072A32983A736CF
+echo "deb http://www.geogebra.net/linux/ stable main" > /etc/apt/sources.list.d/geogebra.list
+wget -qO - https://static.geogebra.org/linux/office@geogebra.org.gpg.key | apt-key add -
+apt-get update
+apt-get install -y geogebra5

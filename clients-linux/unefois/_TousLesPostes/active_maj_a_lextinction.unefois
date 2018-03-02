@@ -1,0 +1,65 @@
+#!/bin/bash
+# Script de déploiement d'une solution de mise à jour de la machine lorsque celle-ci s'éteint
+# TODO : ajouter traitement dans le cas où systemd n'existe pas sur la machine ? 
+
+SCRIPT="/root/maj_poste"    # nom de fichier du script
+SERVICENAME="se3_maj_at_halt"   # nom du service systemd associé
+
+
+# Création d'un fichier script de mise à jour sur la machine hôte
+
+
+echo "Création du script de mise à jour ${SCRIPT}"
+
+cat > "${SCRIPT}" <<FIN
+#!/bin/sh
+while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    # inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
+    echo "$(date) : En attente de la fin de dpkg"
+    sleep 30
+done
+dpkg --configure -a
+# Mise à jour et nettoyage
+# aptdcon --upgrade-system --allow-unauthenticated
+apt-get update && apt-get dist-upgrade -y --allow-unauthenticated && apt-get autoclean  && apt-get autoremove -y
+FIN
+
+chmod +x ${SCRIPT}
+
+
+# Activation du script dans systemd
+# Inspiré de https://askubuntu.com/questions/416299/execute-command-before-shutdown-reboot#416301
+
+# Test de la présence de systemd
+# ne fonctionna pas : if pidof systemd  >/dev/null 2>&1 ; then
+if true ; then
+
+    echo "Creation d'un descripteur de service pour systemd"
+
+    cat > "/etc/systemd/system/${SERVICENAME}.service" <<FIN
+[Unit]
+Description=Mise à jour de la machine
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+# This works because it is installed in the target and will be
+#   executed before the target state is entered
+# Also consider kexec.target
+
+[Service]
+Type=oneshot
+ExecStart=${SCRIPT}  #your path and filename
+
+[Install]
+WantedBy=halt.target reboot.target shutdown.target
+FIN
+
+    echo "Activation du service"
+
+    systemctl enable ${SERVICENAME}
+
+else
+
+    echo "systemd absent du système : le script de mise à jour n'a pas été activé."
+
+fi
+

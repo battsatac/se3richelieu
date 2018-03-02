@@ -1,0 +1,12 @@
+#!/bin/sh
+CODENAME="$(lsb_release -cs)"
+
+
+case "${CODENAME}" in
+    "xenial")
+        aptitude purge -y unity-webapps-common 
+        ;;
+
+esac 
+
+

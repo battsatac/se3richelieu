@@ -1,0 +1,12 @@
+#!/bin/sh
+CODENAME="$(lsb_release -cs)"
+
+
+case "${CODENAME}" in
+    "jessie")
+        apt-get purge -y gnome-games
+        ;;
+
+esac 
+
+
