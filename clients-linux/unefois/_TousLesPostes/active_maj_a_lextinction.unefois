@@ -12,16 +12,26 @@ SERVICENAME="se3_maj_at_halt"   # nom du service systemd associé
 echo "Création du script de mise à jour ${SCRIPT}"
 
 cat > "${SCRIPT}" <<FIN
-#!/bin/sh
-while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+#!/bin/bash
+declare -i compteur=0
+declare -i TEMPS_MAX=$((5*60))	# on attend au plus 5 minutes
+declare -i INTERVALLE=10		# on teste toutes les 10 secondes
+FICHIER_A_TESTER="/var/lib/dpkg/lock"
+
+while fuser "${FICHIER_A_TESTER}" >/dev/null 2>&1 ; do
     # inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
     echo "$(date) : En attente de la fin de dpkg"
-    sleep 30
+    sleep ${INTERVALLE}
+	((compteur > TEMPS_MAX)) && exit 1
+	((compteur+=INTERVALLE))
 done
 dpkg --configure -a
 # Mise à jour et nettoyage
 # aptdcon --upgrade-system --allow-unauthenticated
-apt-get update && apt-get dist-upgrade -y --allow-unauthenticated && apt-get autoclean  && apt-get autoremove -y
+apt-get update && \
+apt-get dist-upgrade -y --allow-unauthenticated && \
+apt-get autoclean  && \
+apt-get autoremove -y
 FIN
 
 chmod +x ${SCRIPT}
@@ -36,24 +46,24 @@ if true ; then
 
     echo "Creation d'un descripteur de service pour systemd"
 
-    cat > "/etc/systemd/system/${SERVICENAME}.service" <<FIN
-[Unit]
-Description=Mise à jour de la machine
-DefaultDependencies=no
-Before=shutdown.target reboot.target halt.target
-# This works because it is installed in the target and will be
-#   executed before the target state is entered
-# Also consider kexec.target
+    cat > "/etc/systemd/system/${SERVICENAME}.service" <<- FIN
+		[Unit]
+		Description=Mise à jour de la machine
+		DefaultDependencies=no
+		Before=shutdown.target reboot.target halt.target
+		#  This works because it is installed in the target and will be
+		#+ executed before the target state is entered
+		#  Also consider kexec.target
 
-[Service]
-Type=oneshot
-ExecStart=${SCRIPT}  #your path and filename
+		[Service]
+		Type=oneshot
+		ExecStart=${SCRIPT}  #your path and filename
 
-[Install]
-WantedBy=halt.target reboot.target shutdown.target
-FIN
+		[Install]
+		WantedBy=halt.target reboot.target shutdown.target
+	FIN
 
-    echo "Activation du service"
+    echo "Activation du service de mise à jour à l'extinction (${SERVICENAME})"
 
     systemctl enable ${SERVICENAME}
 
@@ -62,4 +72,7 @@ else
     echo "systemd absent du système : le script de mise à jour n'a pas été activé."
 
 fi
+
+# Fin du script
+################################################################################
 

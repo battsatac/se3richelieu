@@ -402,7 +402,7 @@ function initialisation_perso ()
         # On teste si la date de dernière modification du fichier est > 7 jours.
 #        if find "$indicateur" -mtime +7 | grep -q "^$indicateur$"; then
         # On teste si on est dimanche cad jds >6, si oui on lance la mise à jour
-        if [ $(date +%u) -gt 7 ]; then # on ne met jamais à jour
+        if [ $(date +%u) -gt 7 ]; then # on ne met jamais à jour, on le fait maintenant à l'extinction de la machine
             echo "Les conditions sont vérifiées, on lance les actions souhaitées."
             echo "Mise à jour des paquets du client"
             # Correction en cas d'arrêt brutal d'une mise à jour précédente
@@ -499,17 +499,17 @@ function ouverture_perso ()
 
         # SB 23/09/2017
         # Ajout d'un raccourci vers le porftolio sur le Bureau
-        cat > "$REP_HOME/Bureau/Portfolio.desktop" <<FIN
-#!/usr/bin/env xdg-open
+        cat > "$REP_HOME/Bureau/Portfolio.desktop" <<- FIN
+			#!/usr/bin/env xdg-open
 
-[Desktop Entry]
-Version=1.0
-Type=Link
-Name=Portfolio professeur
-Icon=system-help
-# Icon=/mnt/netlogon/divers/icons/sambaedu3_icone.png
-URL=http://acver.fr/richportfolio
-FIN
+			[Desktop Entry]
+			Version=1.0
+			Type=Link
+			Name=Portfolio professeur
+			Icon=system-help
+			# Icon=/mnt/netlogon/divers/icons/sambaedu3_icone.png
+			URL=http://acver.fr/richportfolio
+		FIN
 
     	chown "$LOGIN:" "$REP_HOME/Bureau/Portfolio.desktop"
     	chmod 555 "$REP_HOME/Bureau/Portfolio.desktop"
