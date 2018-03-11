@@ -11,7 +11,7 @@ SERVICENAME="se3_maj_at_halt"   # nom du service systemd associé
 
 echo "Création du script de mise à jour ${SCRIPT}"
 
-cat > "${SCRIPT}" <<FIN
+cat > "${SCRIPT}" <<'FIN'
 #!/bin/bash
 declare -i compteur=0
 declare -i TEMPS_MAX=$((5*60))	# on attend au plus 5 minutes
