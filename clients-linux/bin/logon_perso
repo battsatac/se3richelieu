@@ -1,0 +1,217 @@
+#!/bin/bash
+
+
+function initialisation_perso ()
+{
+    # Vous ne pouvez pas laisser le corps de cette fonction complètement
+    # vide. Si vous n'avez rien à mettre dedans, laissez simplement
+    # la commande « true » toute seule.
+#    true
+    activer_pave_numerique
+
+    # Execution récurrente d'une procédure à l'allumage de la machine
+    local indicateur
+    indicateur="/etc/se3/action_maj"
+    # Si le fichier n'existe pas alors il faut le créer.
+    [ ! -e "$indicateur" ] && touch "$indicateur"
+
+    # On teste si la phase d'initialisation correspond à un démarrage du système.
+    if "$DEMARRAGE"; then
+        # On teste si la date de dernière modification du fichier est > 7 jours.
+#        if find "$indicateur" -mtime +7 | grep -q "^$indicateur$"; then
+        # On teste si on est dimanche cad jds >6, si oui on lance la mise à jour
+        if [ $(date +%u) -gt 7 ]; then # on ne met jamais à jour
+            echo "Les conditions sont vérifiées, on lance les actions souhaitées."
+            echo "Mise à jour des paquets du client"
+            # Correction en cas d'arrêt brutal d'une mise à jour précédente
+            # Ne fait rien si tout est OK
+            # aptdcon --fix-install            # similaire à 
+            # en fait aptdcon ne semble pas exister sous jessie
+            while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+                # inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
+                echo "$(date) : En attente de la fin de dpkg"
+                sleep 30
+            done
+            dpkg --configure -a
+            # Mise à jour et nettoyage
+            # aptdcon --upgrade-system --allow-unauthenticated
+            apt-get update && apt-get dist-upgrade -y --allow-unauthenticated && apt-get autoclean  && apt-get autoremove -y
+
+            # aptitude update && aptitude upgrade -y && aptitude autoclean
+
+            # Si tout s'est bien déroulé, alors on peut mettre à jour la date
+            # de dernière modification du fichier avec la commande touch.
+            if [ "$?" = "0" ]; then
+                touch "$indicateur"
+            fi
+        fi
+    fi
+}
+
+function ouverture_perso ()
+{
+    # Au moment de l'appel de cette fonction, le home de l'utilisateur
+    # est déjà créé et il correspond au répertoire local "$REP_HOME".
+    # Cette fonction est l'endroit où les montages de partages réseau
+    # (en fonction du compte utilisé, du poste client utilisé, en
+    # fonction de l'appartenance à un groupe etc.) sont effectués.
+    
+    # Évidemment, vous pouvez utiliser cette fonction pour faire
+    # d'autres choses, selon votre imagination...
+    
+    # Montage du partage « perso » pour tout le monde.
+    monter_partage "//$SE3/homes/Docs" "Docs" \
+        "$REP_HOME/Documents de $LOGIN sur le réseau" \
+        "$REP_HOME/Bureau/Documents de $LOGIN sur le réseau"
+    # lien vers les documents de l'utilisateur sur le réseau
+    # quand on clique sur Documents dans le navigateur de fichiers
+    rm -Rf "$REP_HOME/Documents"
+    creer_lien "Docs" "$REP_HOME/Documents"
+        
+    # Montage du partage « Classes » pour tout le monde.
+    monter_partage "//$SE3/Classes" "Classes" \
+        "$REP_HOME/Classes sur le réseau" \
+        "$REP_HOME/Bureau/Classes sur le réseau"
+
+    # Montage du partage public « Docs » seulement dans le cas où
+    # c'est un compte "prof" qui se connecte, ou bien "admin".
+    if [ "$LOGIN" = "admin" ] || est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs"; then
+        monter_partage "//$SE3/Docs" "Public" \
+            "$REP_HOME/Ressources sur le réseau" \
+            "$REP_HOME/Bureau/Ressources sur le réseau"
+    fi
+    
+    # Montage du partage « admhomes » et de « netlogon-linux » 
+    # seulement dans le cas où c'est le compte "admin" qui se connecte.
+    if [ "$LOGIN" = "admin" ]; then
+        monter_partage "//$SE3/admhomes" "admhomes" \
+            "$REP_HOME/admhomes" \
+            "$REP_HOME/Bureau/admhomes"
+        monter_partage "//$SE3/netlogon-linux" "clients-linux" \
+            "$REP_HOME/clients-linux" \
+            "$REP_HOME/Bureau/clients-linux"
+    fi
+
+    # SB ajout du 12/12/2017 pour Stephan Acker
+    # Montage du partage public « BIA » seulement pour le groupe BIA
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "BIA"; then
+        monter_partage "//$SE3/Docs/public/BIA" "BIA" \
+            "$REP_HOME/BIA" \
+            "$REP_HOME/Bureau/BIA"
+    fi
+
+    # Traitement spécifique des profils professeurs
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs"
+    then
+
+        # SB 24/09/2016
+        # Le profil firefox des profs est le même sur les postes Windows et Gnu/linux
+        rm -Rf "$REP_HOME/.mozilla/firefox"
+        monter_partage "//$SE3/homes/profil/appdata/Mozilla/Firefox" "ProfilFirefox" \
+            "$REP_HOME/.mozilla/firefox"
+
+        # SB 06/10/2017
+        # Montage du partage //se3/progs pour accès aux icones
+#        rm -Rf "$REP_HOME/.icons"
+        
+
+        # SB 23/09/2017
+        # Ajout d'un raccourci vers le porftolio sur le Bureau
+        cat > "$REP_HOME/Bureau/Portfolio.desktop" <<FIN
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Link
+Name=Portfolio professeur
+Icon=system-help
+# Icon=/mnt/netlogon/divers/icons/sambaedu3_icone.png
+URL=http://acver.fr/richportfolio
+FIN
+
+    	chown "$LOGIN:" "$REP_HOME/Bureau/Portfolio.desktop"
+    	chmod 555 "$REP_HOME/Bureau/Portfolio.desktop"
+    fi
+
+    # SB 24/09/2016    
+    # Incruster un message sur le bureau des utilisateurs (voir la fonction lancer_conky plus bas)
+    lancer_conky
+
+    # SB 21/09/2017
+    # Modifier la mise en veille de l'écran :
+    # pas d'écran noir si inactivité
+    su - $LOGIN  -c "dbus-launch gsettings set org.gnome.desktop.session idle-delay 0"
+    # mise en veille de l'écran au bout d'une heure
+    su - $LOGIN  -c "dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 3600"
+
+    # SB 21/12/2017
+    # Affichage des boutons maximiser et minimiser
+# Attention la commande suivante bloque firefox (qui de plaint que le profil ne peut être chargé)
+# doit être lié au fait que la commande est lancée par root
+#    gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'
+    su - $LOGIN  -c "dbus-launch gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'" 
+}
+
+
+function fermeture_perso ()
+{
+    # Vous ne pouvez pas laisser le corps de cette fonction complètement
+    # vide. Si vous n'avez rien à mettre dedans, laissez simplement
+    # la commande « true » toute seule.
+    true
+}
+
+
+function lancer_conky ()
+{
+    # On crée un fichier de configuration .conkyrc dans le home de l'utilisateur.
+    # précisant le contenu du message ainsi que certains paramètres (comme la
+    # taille de la police par exemple).
+    cat > "$REP_HOME/.conkyrc" <<FIN
+conky.config = {
+        use_xft = true,
+        font = 'Mono:size=10',
+        double_buffer = true,
+        alignment = 'top_right',
+        update_interval = 60,
+        own_window = true,
+        own_window_transparent = true,
+        own_window_argb_visual = true,
+        override_utf8_locale = true,
+        text_buffer_size = 1024,
+        own_window_hints = 'undecorated,below,sticky,skip_taskbar,skip_pager',
+};
+
+conky.text = [[
+Bonjour $NOM_COMPLET_LOGIN,
+
+Vous utilisez actuellement la station $(hostname).
+
+Veillez à enregistrer vos données personnelles dans le dossier :
+    « Documents de $LOGIN sur le réseau »
+qui se trouve sur le bureau, et uniquement dans ce dossier, sans quoi
+vos données seront perdues une fois votre session fermée.
+
+Merci de fermer votre session mais de ne PAS éteindre la station après 
+utilisation. Elle s'éteindra automatiquement après les cours.
+
+Astuce : sur les stations Debian, déplacez la souris dans le coin
+supérieur gauche ou appuyez la touche « logo » en bas à gauche
+pour accéder aux bureaux, raccourcis et applications ouvertes. 
+Un champ de recherche vous permet de trouver facilement applications 
+et documents.
+]];
+
+FIN
+
+    # On fait de "$LOGIN" le propriétaire du fichier .conkyrc.
+    chown "$LOGIN:" "$REP_HOME/.conkyrc"
+    chmod 644 "$REP_HOME/.conkyrc"
+
+    #On lancera conky à la fin, une fois l'exécution du script logon terminée.
+    #Pour être sûr que l'ouverture de session est achevée, on laisse un délai
+    #de quelques secondes entre la fin du script de logon et le lancement de la
+    #commande conky (avec ses arguments).
+    executer_a_la_fin "25" conky --config "$REP_HOME/.conkyrc"
+}
+
