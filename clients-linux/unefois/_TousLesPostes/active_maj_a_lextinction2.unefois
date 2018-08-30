@@ -4,10 +4,12 @@
 #************************************************#
 #        active_maj_a_lextinction.unefois      	 #
 #          written by Stephan BATT               #
-#              v2 11 mars 2018                   #
 # Script de déploiement d'une solution de mise 	 #
 # à jour de la machine lorsque celle-ci s'éteint #
 #************************************************#
+
+
+
 
 # TODO 
 # - ajouter traitement dans le cas où systemd n'existe pas sur la machine ? 
@@ -35,6 +37,14 @@ cat > "${SCRIPT}" <<'FIN'
 # du poste par systemd							#
 #***********************************************#
 
+# Historique des versions :
+
+# v2.1 30 aout 2018 : 
+# - test argument en entrée
+
+# v2 11 mars 2018
+
+
 TEST_APT="/var/lib/apt/lists/lock"
 TEST_DPKG="/var/lib/dpkg/lock"
 ATTENTE_MAX=$(( 5 * 60 ))	# temps d'attente maximal en secondes, soit 5 minutes
@@ -46,44 +56,50 @@ LINESEP="###########################################################"
 
 function attend_verrou ()
 {
-	# La fonction prend en argument : 
-	# 1 : le nom du fichier à tester
-	# 2 : le temps maximal d'attente en SECONDES
-	# 3 : optionnel : l'intervalle de temps en SECONDES entre les tests
+    # La fonction prend en argument : 
+    # 1 : le nom du fichier à tester
+    # 2 : le temps maximal d'attente en SECONDES
+    # 3 : optionnel : l'intervalle de temps en SECONDES entre les tests
 
-	# Traitement des arguments :
-	declare NOM_FICHIER="$1"
-	declare -i TEMPS_MAX=${2:-60}		# temps d'attente maximal en secondes (par défaut on attend 1 minute)
-	declare -i INTERVALLE=${3:-5}		# Intervalle de test, par défaut toutes les 5 secondes si non fourni
+    # Traitement des arguments :
 
-	# Début du programme
-	declare -i compteur=0
+    if [ -z "$1" ]
+        then
+            echo "Fichier verrou non fourni. Abandon"
+            exit 1
+    fi
+    declare NOM_FICHIER="$1"
+    declare -i TEMPS_MAX=${2:-60}		# temps d'attente maximal en secondes (par défaut on attend 1 minute)
+    declare -i INTERVALLE=${3:-5}		# Intervalle de test, par défaut toutes les 5 secondes si non fourni
 
-	while fuser "$1" >/dev/null 2>&1 ; do
-#	while true ; do
-		# inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
-		echo "$(date) : En attente du deverrouillage de $1"
-		sleep ${INTERVALLE}
-		((compteur > TEMPS_MAX)) && return 1
-		((compteur+=INTERVALLE))
-	done
-	return 0
+    # Début du programme
+    declare -i compteur=0
+
+    while fuser "$1" >/dev/null 2>&1 ; do
+        #	while true ; do
+        # inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
+        echo "$(date) : En attente du deverrouillage de $1"
+        sleep ${INTERVALLE}
+        ((compteur > TEMPS_MAX)) && return 1
+        ((compteur+=INTERVALLE))
+    done
+    return 0
 }
 
 echo -e "\n${LINESEP}\n\t Tentative d'interrogation des dépôts\n${LINESEP}\n"
 if  attend_verrou ${TEST_APT} ${ATTENTE_MAX}; then 
-	apt-get update
+    apt-get update
 fi
 
 echo -e "\n${LINESEP}\n\t Tentative de mise à jour du poste\n${LINESEP}\n"
 if  attend_verrou ${TEST_DPKG} ${ATTENTE_MAX}; then 
-#echo "on met a jour"
-#: <<- EOF
-	dpkg --configure -a
-	apt-get dist-upgrade -y --allow-unauthenticated && \
-	apt-get autoclean  && \
-	apt-get autoremove -y
-#EOF
+    #echo "on met a jour"
+    #: <<- EOF
+    dpkg --configure -a
+    apt-get dist-upgrade -y --allow-unauthenticated && \
+        apt-get autoclean  && \
+        apt-get autoremove -y
+    #EOF
 fi
 
 FIN
@@ -102,21 +118,21 @@ if true ; then
     echo "Creation d'un descripteur de service pour systemd"
 
     cat > "/etc/systemd/system/${SERVICENAME}.service" <<- FIN
-		[Unit]
-		Description=Mise à jour de la machine
-		DefaultDependencies=no
-		Before=shutdown.target reboot.target halt.target
-		#  This works because it is installed in the target and will be
-		#+ executed before the target state is entered
-		#  Also consider kexec.target
+    [Unit]
+    Description=***** Mise à jour du poste - VEUILLEZ NE PAS ÉTEINDRE *****
+    DefaultDependencies=no
+    Before=shutdown.target reboot.target halt.target
+    #  This works because it is installed in the target and will be
+    #+ executed before the target state is entered
+    #  Also consider kexec.target
 
-		[Service]
-		Type=oneshot
-		ExecStart=${SCRIPT}  #your path and filename
+    [Service]
+    Type=oneshot
+    ExecStart=${SCRIPT}  #your path and filename
 
-		[Install]
-		WantedBy=halt.target reboot.target shutdown.target
-	FIN
+    [Install]
+    WantedBy=halt.target reboot.target shutdown.target
+    FIN
 
     echo "Activation du service de mise à jour à l'extinction (${SERVICENAME})"
 
@@ -125,9 +141,9 @@ if true ; then
 else
 
     echo "systemd absent du système : le script de mise à jour n'a pas été activé."
-
+    exit 1
 fi
 
-# Fin du script
+# Fin du script
 ################################################################################
 
