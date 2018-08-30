@@ -100,6 +100,14 @@ function ouverture_perso ()
             "$REP_HOME/Bureau/BIA"
     fi
 
+    # SB ajout du 03/07/2018 pour jurys de bac
+    # Montage du partage public « jurybac » seulement pour le groupe Bac (le partage s'appelle bac)
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Bac"; then
+        monter_partage "//$SE3/bac" "Jury_bac" \
+            "$REP_HOME/Bac" \
+            "$REP_HOME/Bureau/Bac"
+    fi
+
     # Traitement spécifique des profils professeurs
     if est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs"
     then
@@ -158,7 +166,8 @@ function fermeture_perso ()
     # Vous ne pouvez pas laisser le corps de cette fonction complètement
     # vide. Si vous n'avez rien à mettre dedans, laissez simplement
     # la commande « true » toute seule.
-    true
+    # true
+    killall conky
 }
 
 
@@ -198,7 +207,7 @@ function lancer_conky ()
 		utilisation. Elle s'éteindra automatiquement après les cours.
 
 		Astuce : sur les stations Debian, déplacez la souris dans le coin
-		supérieur gauche ou appuyez la touche « logo » en bas à gauche
+		supérieur gauche ou appuyez la touche « logo » en bas à gauche du clavier
 		pour accéder aux bureaux, raccourcis et applications ouvertes. 
 		Un champ de recherche vous permet de trouver facilement applications 
 		et documents.

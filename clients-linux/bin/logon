@@ -402,7 +402,7 @@ function initialisation_perso ()
         # On teste si la date de dernière modification du fichier est > 7 jours.
 #        if find "$indicateur" -mtime +7 | grep -q "^$indicateur$"; then
         # On teste si on est dimanche cad jds >6, si oui on lance la mise à jour
-        if [ $(date +%u) -gt 7 ]; then # on ne met jamais à jour, on le fait maintenant à l'extinction de la machine
+        if [ $(date +%u) -gt 7 ]; then # on ne met jamais à jour
             echo "Les conditions sont vérifiées, on lance les actions souhaitées."
             echo "Mise à jour des paquets du client"
             # Correction en cas d'arrêt brutal d'une mise à jour précédente
@@ -482,6 +482,14 @@ function ouverture_perso ()
             "$REP_HOME/Bureau/BIA"
     fi
 
+    # SB ajout du 03/07/2018 pour jurys de bac
+    # Montage du partage public « jurybac » seulement pour le groupe Bac (le partage s'appelle bac)
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Bac"; then
+        monter_partage "//$SE3/bac" "Jury_bac" \
+            "$REP_HOME/Bac" \
+            "$REP_HOME/Bureau/Bac"
+    fi
+
     # Traitement spécifique des profils professeurs
     if est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs"
     then
@@ -499,17 +507,17 @@ function ouverture_perso ()
 
         # SB 23/09/2017
         # Ajout d'un raccourci vers le porftolio sur le Bureau
-        cat > "$REP_HOME/Bureau/Portfolio.desktop" <<- FIN
-			#!/usr/bin/env xdg-open
+        cat > "$REP_HOME/Bureau/Portfolio.desktop" <<FIN
+#!/usr/bin/env xdg-open
 
-			[Desktop Entry]
-			Version=1.0
-			Type=Link
-			Name=Portfolio professeur
-			Icon=system-help
-			# Icon=/mnt/netlogon/divers/icons/sambaedu3_icone.png
-			URL=http://acver.fr/richportfolio
-		FIN
+[Desktop Entry]
+Version=1.0
+Type=Link
+Name=Portfolio professeur
+Icon=system-help
+# Icon=/mnt/netlogon/divers/icons/sambaedu3_icone.png
+URL=http://acver.fr/richportfolio
+FIN
 
     	chown "$LOGIN:" "$REP_HOME/Bureau/Portfolio.desktop"
     	chmod 555 "$REP_HOME/Bureau/Portfolio.desktop"
@@ -540,7 +548,8 @@ function fermeture_perso ()
     # Vous ne pouvez pas laisser le corps de cette fonction complètement
     # vide. Si vous n'avez rien à mettre dedans, laissez simplement
     # la commande « true » toute seule.
-    true
+    # true
+    killall conky
 }
 
 
@@ -580,7 +589,7 @@ function lancer_conky ()
 		utilisation. Elle s'éteindra automatiquement après les cours.
 
 		Astuce : sur les stations Debian, déplacez la souris dans le coin
-		supérieur gauche ou appuyez la touche « logo » en bas à gauche
+		supérieur gauche ou appuyez la touche « logo » en bas à gauche du clavier
 		pour accéder aux bureaux, raccourcis et applications ouvertes. 
 		Un champ de recherche vous permet de trouver facilement applications 
 		et documents.
