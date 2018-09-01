@@ -477,18 +477,34 @@ function ouverture_perso ()
     # SB ajout du 12/12/2017 pour Stephan Acker
     # Montage du partage public « BIA » seulement pour le groupe BIA
     if est_dans_liste "$LISTE_GROUPES_LOGIN" "BIA"; then
-        monter_partage "//$SE3/Docs/public/BIA" "BIA" \
+        monter_partage "//$SE3/Docs/BIA" "BIA" \
             "$REP_HOME/BIA" \
             "$REP_HOME/Bureau/BIA"
     fi
 
+    # SB ajout du 30/08/2018 suite à la purge de Public
+    # Montage du partage « Langues » seulement pour le groupe pole_langues
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "pole_langues"; then
+        monter_partage "//$SE3/Docs/Langues" "Langues" \
+            "$REP_HOME/Langues" \
+            "$REP_HOME/Bureau/Langues"
+    fi
+
+    # SB ajout du 30/08/2018 suite à la purge de Public
+    # Montage du partage « Réseau » seulement pour le groupe intervenants_reseau
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "intervenants_reseau"; then
+        monter_partage "//$SE3/Docs/reseau" "Réseau" \
+            "$REP_HOME/Réseau" \
+            "$REP_HOME/Bureau/Réseau"
+    fi
+
     # SB ajout du 03/07/2018 pour jurys de bac
     # Montage du partage public « jurybac » seulement pour le groupe Bac (le partage s'appelle bac)
-    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Bac"; then
-        monter_partage "//$SE3/bac" "Jury_bac" \
-            "$REP_HOME/Bac" \
-            "$REP_HOME/Bureau/Bac"
-    fi
+#    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Bac"; then
+#        monter_partage "//$SE3/bac" "Jury_bac" \
+#            "$REP_HOME/Bac" \
+#            "$REP_HOME/Bureau/Bac"
+#    fi
 
     # Traitement spécifique des profils professeurs
     if est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs"
