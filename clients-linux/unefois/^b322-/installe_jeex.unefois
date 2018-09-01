@@ -1,4 +1,0 @@
-#!/bin/bash
-# installation de jeex éditeur hexadécimal
-
-apt-get install -y jeex 

@@ -1,4 +1,0 @@
-#!/bin/bash
-# installation de g++ pour compilation C dans code::blocks
-
-apt-get install -y g++
