@@ -111,9 +111,9 @@ function ouverture_perso ()
     # SB ajout du 30/08/2018 suite à la purge de Public
     # Montage du partage « Réseau » seulement pour le groupe intervenants_reseau
     if est_dans_liste "$LISTE_GROUPES_LOGIN" "intervenants_reseau"; then
-        monter_partage "//$SE3/Docs/reseau" "Réseau" \
-            "$REP_HOME/Réseau" \
-            "$REP_HOME/Bureau/Réseau"
+        monter_partage "//$SE3/Docs/Reseau" "Reseau" \
+            "$REP_HOME/Reseau" \
+            "$REP_HOME/Bureau/Reseau"
     fi
 
     # SB ajout du 03/07/2018 pour jurys de bac
