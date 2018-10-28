@@ -1,0 +1,7 @@
+# https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_ignoring
+# https://help.github.com/articles/ignoring-files/
+# https://git-scm.com/docs/gitignore
+
+open-sankore/
+**/bin/logon
+*.zip
