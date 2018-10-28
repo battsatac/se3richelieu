@@ -7,7 +7,7 @@ Installer git :
 apt-get install git -y
 ```
 
-Installer la clef ssh poru git dans /root/.ssh :
+Installer la clef ssh pour git dans /root/.ssh :
 
 
 Clonage du projet :
