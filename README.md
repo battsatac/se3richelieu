@@ -17,3 +17,7 @@ cd /root/batts/github
 git clone git@github.com:battsatac/se3richelieu.git
 ```
 
+de façon optionnelle pour changer l'éditeur par défaut pour vim (au lieu de nano) :
+```
+sudo update-alternatives --config editor
+```
