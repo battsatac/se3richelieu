@@ -8,10 +8,7 @@ Ensemble des scripts persos utilisés sur le serveur se3 du lycée Richelieu (li
 ```
 apt-get install git -y
 ```
-
 1. Installer la clef ssh pour git dans /root/.ssh : à faire à la main
-
-
 1. Faire en sorte que git ne tienne pas compte des changements de droits sur les fichiers
 ```
 git config core.fileMode false
