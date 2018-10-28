@@ -19,11 +19,9 @@ Cela évite d'avoir à faire des commit à chaque dpkg-reconfigure
 Gérer aussi de près le fichier .gitignore pour, par exemple, ne pas suivre `bin/logon`.
 
 Pour ne plus suivre un fichier qui aurait été ajouté avant la déclaration dans .gitignore : 
->>>
-Another useful thing you may want to do is to keep the file in your working tree but remove it from your staging area. In other words, you may want to keep the file on your hard drive but not have Git track it anymore. This is particularly useful if you forgot to add something to your .gitignore file and accidentally staged it, like a large log file or a bunch of .a compiled files. To do this, use the --cached option:
+> Another useful thing you may want to do is to keep the file in your working tree but remove it from your staging area. In other words, you may want to keep the file on your hard drive but not have Git track it anymore. This is particularly useful if you forgot to add something to your .gitignore file and accidentally staged it, like a large log file or a bunch of .a compiled files. To do this, use the --cached option:
 
-$ git rm --cached README
->>>
+> $ git rm --cached README
 
 
 ## Clonage du projet et mise en place du montage
