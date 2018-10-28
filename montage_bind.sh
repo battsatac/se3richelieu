@@ -4,4 +4,4 @@ REAL_ROOT="/home/netlogon/clients-linux/"
 
 mount --bind "${GIT_ROOT}/unefois/" "${REAL_ROOT}/unefois"
 mount --bind "${GIT_ROOT}/bin/" "${REAL_ROOT}/bin"
-mount --bind "${GIT_ROOT}/divers/imprimantes/" "${REAL_ROOT}/divers/imprimantes/"
+mount --bind "${GIT_ROOT}/divers/" "${REAL_ROOT}/divers"
