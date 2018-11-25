@@ -1,0 +1,47 @@
+#!/bin/bash
+# D'après https://wiki.debian.org/fr/CDDVD
+
+# auteur : Stephan Batt
+# 25/11/2018
+
+echo -e "*** Installation des bibliothèques de lecture des DVD protégés par DRM\n"
+
+echo -e "* installation de l'outil de gestion des source list : apt-add-repository\n"
+apt-get install -y software-properties-common
+echo -e "* installation de l'outil de préconfiguration des paquets : debconf-set/get-selections\n"
+apt-get install -y debconf-utils
+
+
+echo -e "* ajout et activation (-s) de jessie-backports contrib dans le source list\n"
+apt-add-repository -s "deb http://ftp.debian.org/debian jessie-backports contrib"
+
+echo -e "* mise à jour des dépots et installation\n"
+apt-get update
+
+# Comment passer des réponses à l'installateur
+# https://unix.stackexchange.com/questions/96215/feeding-input-values-to-dpkg-reconfigure-in-a-non-interactive-way
+
+cat > "/root/libdvd-pkg_conf.dat" <<- FIN
+#
+libdvd-pkg  libdvd-pkg/post-invoke_hook-remove  boolean false
+#
+libdvd-pkg  libdvd-pkg/first-install    note    
+# Faut-il activer les mises à niveau automatiques pour libdvdcss2 ?
+libdvd-pkg  libdvd-pkg/post-invoke_hook-install boolean true
+#
+libdvd-pkg  libdvd-pkg/upgrade  note    
+# Faut-il télécharger, compiler puis installer libdvdcss2/1.4.0-1 ?
+libdvd-pkg  libdvd-pkg/build    boolean true
+FIN
+
+debconf-set-selections -v "/root/libdvd-pkg_conf.dat"
+
+# DEBCONF_DB_OVERRIDE='File {/root/libdvd-pkg_conf.dat}' 
+DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes libdvdread4 libdvd-pkg
+
+# Lance le processus de téléchargement des souces des biblios depuis Videolan
+# et lance la compilation
+dpkg-reconfigure -f noninteractive libdvd-pkg
+
+echo -e "*** Fin de l'installation des bibliothèques"
+
