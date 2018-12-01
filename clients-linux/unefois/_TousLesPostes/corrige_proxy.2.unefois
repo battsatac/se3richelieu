@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# SB 29/11/2018
+# proxy pour wget et /etc/profile   
+
+FILE_LIST="/etc/wgetrc /etc/proxy.sh"
+
+for file in $FILE_LIST
+do
+    sed -i 's/172.20.0.1/172.20.0.246/g' $file;
+done
+
