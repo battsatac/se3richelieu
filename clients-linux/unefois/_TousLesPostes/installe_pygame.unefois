@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Script de déploiement de pygame
+
+# Auteur : Stephan Batt
+# 25/11/2018
+# Suite à demande Guillmaume Monlibert pour l'ISN
+
+TEST_APT="/var/lib/apt/lists/lock"
+TEST_DPKG="/var/lib/dpkg/lock"
+ATTENTE_MAX=$(( 10 * 60 ))   # temps d'attente maximal en secondes, soit 10 minutes
+
+#ATTENTE_MAX=$(( 10 ))      # temps d'attente maximal en secondes, soit 5 minutes
+#INTERVALLE_TEST=5          # temps d'attente maximal en secondes
+
+LINESEP="###########################################################"
+
+function attend_verrou ()
+{
+    # La fonction prend en argument : 
+    # 1 : le nom du fichier à tester
+    # 2 : le temps maximal d'attente en SECONDES
+    # 3 : optionnel : l'intervalle de temps en SECONDES entre les tests
+
+    # Traitement des arguments :
+
+    if [ -z "$1" ]
+        then
+            echo "Fichier verrou non fourni. Abandon"
+            exit 1
+    fi
+    declare NOM_FICHIER="$1"
+    declare -i TEMPS_MAX=${2:-60}       # temps d'attente maximal en secondes (par défaut on attend 1 minute)
+    declare -i INTERVALLE=${3:-5}       # Intervalle de test, par défaut toutes les 5 secondes si non fourni
+
+    # Début du programme
+    declare -i compteur=0
+
+    while fuser "$1" >/dev/null 2>&1 ; do
+        #   while true ; do
+        # inspiré de https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
+        echo "$(date) : En attente du deverrouillage de $1"
+        sleep ${INTERVALLE}
+        ((compteur > TEMPS_MAX)) && return 1
+        ((compteur+=INTERVALLE))
+    done
+    return 0
+}
+
+echo -e "\n${LINESEP}\n\t Tentative d'interrogation des dépôts\n${LINESEP}\n"
+if  attend_verrou ${TEST_APT} ${ATTENTE_MAX}; then 
+    apt-get update
+fi
+
+echo -e "\n${LINESEP}\n\t Tentative de mise à jour du poste\n${LINESEP}\n"
+if  attend_verrou ${TEST_DPKG} ${ATTENTE_MAX}; then 
+    #echo "on met a jour"
+    #: <<- EOF
+#    dpkg --configure -a
+#    apt-get dist-upgrade -y --allow-unauthenticated && \
+#        apt-get autoclean  && \
+#        apt-get autoremove -y
+#    #EOF
+
+
+    echo -e "\n${LINESEP}\n\t Installation de pygame \n${LINESEP}\n"
+
+    apt-get install -y python3-pip python3-numpy libav-tools libsdl-image1.2-dev \
+            libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libsdl1.2-dev \
+            libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev
+
+    python3 -m pip install -U pygame
+
+    echo -e "\n${LINESEP}\n\t Fin de l'installation. \n${LINESEP}\n"
+fi
+
