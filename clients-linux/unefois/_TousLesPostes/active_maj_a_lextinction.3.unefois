@@ -39,6 +39,9 @@ cat > "${SCRIPT}" <<'FIN'
 
 # Historique des versions :
 
+# V3 16/12/18
+# Tient compte de l'horaire pour s'activer
+
 # v2.1 30 aout 2018 : 
 # - test argument en entrée
 
@@ -86,22 +89,44 @@ function attend_verrou ()
     return 0
 }
 
-echo -e "\n${LINESEP}\n\t Tentative d'interrogation des dépôts\n${LINESEP}\n"
-if  attend_verrou ${TEST_APT} ${ATTENTE_MAX}; then 
-    apt-get update
-fi
+function cest_le_bon_moment ()
+{
+    # Renvoie vrai si on considère que c'est le bon moment
+    # pour faire la mise à jour
+    # le soir après les cours 
+    # la samedi midi 
+    # le dimanche
+    
+    H=$(date +%k)       # heure
+    echo "heure : $H" 
+    JDS=$(date +%u)     # jour de semaine
+    echo "jour de semaine: $JDS" 
+    if (( $H>=18  )) || ( (( $JDS==6 )) && (( $H>=12 )) ) || (( $JDS==7 )) ; then
+        echo "horaire adéquat pour une mise à jour"
+        return 0
+    else
+        echo "horaire inadapté pour une mise à jour"
+        return 1
+    fi
+}
 
-echo -e "\n${LINESEP}\n\t Tentative de mise à jour du poste\n${LINESEP}\n"
-if  attend_verrou ${TEST_DPKG} ${ATTENTE_MAX}; then 
-    #echo "on met a jour"
-    #: <<- EOF
-    dpkg --configure -a
-    apt-get dist-upgrade -y --allow-unauthenticated && \
-        apt-get autoclean  && \
-        apt-get autoremove -y
-    #EOF
+if cest_le_bon_moment; then
+    echo -e "\n${LINESEP}\n\t Tentative d'interrogation des dépôts\n${LINESEP}\n"
+    if  attend_verrou ${TEST_APT} ${ATTENTE_MAX}; then 
+        apt-get update
+    fi
+    
+    echo -e "\n${LINESEP}\n\t Tentative de mise à jour du poste\n${LINESEP}\n"
+    if  attend_verrou ${TEST_DPKG} ${ATTENTE_MAX}; then 
+        #echo "on met a jour"
+        #: <<- EOF
+        dpkg --configure -a
+        apt-get dist-upgrade -y --allow-unauthenticated && \
+            apt-get autoclean  && \
+            apt-get autoremove -y
+        #EOF
+    fi
 fi
-
 FIN
 
 chmod +x ${SCRIPT}
@@ -119,7 +144,7 @@ if true ; then
 
     cat > "/etc/systemd/system/${SERVICENAME}.service" <<- FIN
 [Unit]
-Description=***** Mise à jour du poste - VEUILLEZ NE PAS ÉTEINDRE *****
+Description=***** Mise à jour du poste - VEUILLEZ PATIENTER *****
 DefaultDependencies=no
 Before=shutdown.target reboot.target halt.target
 #  This works because it is installed in the target and will be

@@ -49,7 +49,8 @@ function attend_verrou ()
 
 echo -e "\n${LINESEP}\n\t Tentative d'interrogation des dépôts\n${LINESEP}\n"
 if  attend_verrou ${TEST_APT} ${ATTENTE_MAX}; then 
-    apt-get update
+#    apt-get update
+    :
 fi
 
 echo -e "\n${LINESEP}\n\t Tentative de mise à jour du poste\n${LINESEP}\n"
@@ -69,7 +70,8 @@ if  attend_verrou ${TEST_DPKG} ${ATTENTE_MAX}; then
             libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev libsdl1.2-dev \
             libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev
 
-    python3 -m pip install -U pygame
+# en mode shell il faut préciser le proxy Grrr
+    pip3 --proxy "172.20.0.246:3128" install -U pygame
 
     echo -e "\n${LINESEP}\n\t Fin de l'installation. \n${LINESEP}\n"
 fi
