@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Paquet non déployé trop de problèmes
+# paquet construit avec les pieds
+# on pourra éventuellement compiler, c'est relou
+
+
+
+# On déploie sur le parc :
+PARC="_maths"
+
+if appartient_au_parc "${PARC}" "${NOM_HOTE}"; then
+    # La machine appartient au parc _maths 
+    echo "${NOM_HOTE} appartient au parc ${PARC}, on déploie Xcas"
+    echo "deb http://www-fourier.ujf-grenoble.fr/~parisse/debian/ stable main" | tee /etc/apt/sources.list.d/xcas.list
+    wget -qO - www-fourier.ujf-grenoble.fr/~parisse/xcas_public_key.gpg | apt-key add -
+    apt-get update && apt-get install -y --allow-unauthenticated giac
+else
+    # La machine n'appartient pas au parc
+    echo "${NOM_HOTE} n'appartient pas au parc ${PARC}, on n'installe pas Xcas"
+    :
+fi

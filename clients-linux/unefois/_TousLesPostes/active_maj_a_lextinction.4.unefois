@@ -94,14 +94,14 @@ function cest_le_bon_moment ()
     # Renvoie vrai si on considère que c'est le bon moment
     # pour faire la mise à jour
     # le soir après les cours 
-    # la samedi midi 
+    # le mercredi ou samedi midi 
     # le dimanche
     
     H=$(date +%k)       # heure
     echo "heure : $H" 
     JDS=$(date +%u)     # jour de semaine
     echo "jour de semaine: $JDS" 
-    if (( $H>=18  )) || ( (( $JDS==6 )) && (( $H>=12 )) ) || (( $JDS==7 )) ; then
+    if (( $H>=18  )) || ( ( (( $JDS==6 )) || (( JDS==3 )) ) && (( $H>=12 )) ) || (( $JDS==7 )) ; then
         echo "horaire adéquat pour une mise à jour"
         return 0
     else
