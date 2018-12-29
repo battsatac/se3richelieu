@@ -101,7 +101,8 @@ function cest_le_bon_moment ()
     echo "heure : $H" 
     JDS=$(date +%u)     # jour de semaine
     echo "jour de semaine: $JDS" 
-    if (( $H>=18  )) || ( ( (( $JDS==6 )) || (( JDS==3 )) ) && (( $H>=12 )) ) || (( $JDS==7 )) ; then
+    # if (( $H>=18  )) || ( ( (( $JDS==6 )) || (( $JDS==3 )) ) && (( $H>=12 )) ) || (( $JDS==7 )) ; then
+    if (( $H>=18 || (($JDS==6 || $JDS==3) && $H>=12) || $JDS==7 )); then
         echo "horaire adéquat pour une mise à jour"
         return 0
     else
@@ -121,7 +122,11 @@ if cest_le_bon_moment; then
         #echo "on met a jour"
         #: <<- EOF
         dpkg --configure -a
-        apt-get dist-upgrade -y --allow-unauthenticated && \
+
+# D'après https://debian-handbook.info/browse/stable/sect.automatic-upgrades.html 
+
+        export DEBIAN_FRONTEND=noninteractive
+        yes '' | apt-get -y --allow-unauthenticated -o DPkg::options::="--force-confdef" -o DPkg::options::="--force-confold" dist-upgrade && \
             apt-get autoclean  && \
             apt-get autoremove -y
         #EOF
