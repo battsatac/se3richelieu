@@ -38,6 +38,8 @@ cat > "${SCRIPT}" <<'FIN'
 #***********************************************#
 
 # Historique des versions :
+# V4 05/02/19
+# Option --force pour ne pas ternir compte de la date
 
 # V3 16/12/18
 # Tient compte de l'horaire pour s'activer

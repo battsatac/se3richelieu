@@ -1,0 +1,16 @@
+#!/bin/bash
+
+proxy="172.20.0.246:3128"
+conf_file="/etc/profile.d/proxy_richelieu"
+
+echo "-------------------------------------------------"
+
+echo "Création/màj du fichier ${conf_file}"
+cat  > "${conf_file}" <<- EOF
+http_proxy=${proxy}
+https_proxy=${proxy}
+export http_proxy
+export https_proxy
+EOF
+
+echo "-------------------------------------------------"

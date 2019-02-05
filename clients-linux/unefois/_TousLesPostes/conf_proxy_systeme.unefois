@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# conf_file="/etc/environment"
+conf_file="/etc/profile"
+conf_param1="http_proxy"
+conf_param2="https_proxy"
+conf_value="172.20.0.246:3128"
+
+function set_param ()
+{
+local conf_file=$1
+local conf_param=$2
+local conf_value=$3
+
+echo "--------------------------------------------------------"
+echo "Modification/ajout du paramètre ${conf_param}"
+echo "À la valeur : ${conf_value}"
+echo "Dans le fichier : ${conf_file}"
+
+if grep -q "${conf_param}" "${conf_file}" 
+then
+    echo "Modification du paramètre existant "
+    sed -i "s/\(${conf_param} *= *\).*/\1${conf_value}/" ${conf_file}
+else
+    echo "Ajout du paramètre à la fin du fichier"
+    echo "${conf_param}=${conf_value}" >> ${conf_file}
+fi
+echo "--------------------------------------------------------"
+}
+
+set_param ${conf_file} ${conf_param1} ${conf_value}
+set_param ${conf_file} ${conf_param2} ${conf_value}
