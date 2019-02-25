@@ -576,32 +576,30 @@ function lancer_conky ()
     # taille de la police par exemple).
 	# la syntaxe <<- du "here" permet de supprimer les tabulations cf. p101 du livre
 	# "Shell linux par la pratique"
-    cat > "$REP_HOME/.conkyrc" <<- FIN
-		conky.config = {
-				use_xft = true,
-				font = 'Mono:size=10',
-				double_buffer = true,
-				alignment = 'top_right',
-				update_interval = 60,
-				own_window = true,
-				own_window_transparent = true,
-				own_window_argb_visual = true,
-				override_utf8_locale = true,
-				text_buffer_size = 1024,
-				own_window_hints = 'undecorated,below,sticky,skip_taskbar,skip_pager',
-		};
+cat > "$REP_HOME/.conkyrc" <<- FIN
+conky.config = {
+		use_xft = true,
+		font = 'Mono:size=10',
+		double_buffer = true,
+		alignment = 'top_right',
+		update_interval = 60,
+		own_window = true,
+		own_window_transparent = true,
+		own_window_argb_visual = true,
+		override_utf8_locale = true,
+		text_buffer_size = 1024,
+		own_window_hints = 'undecorated,below,sticky,skip_taskbar,skip_pager',
+};
 
-		conky.text = [[
-		Bonjour $NOM_COMPLET_LOGIN,
+conky.text = [[
+Bonjour $NOM_COMPLET_LOGIN,
 
-		Vous utilisez actuellement la station $(hostname).
- 
-		Veillez à enregistrer vos données personnelles dans le dossier :
-			« Documents de $LOGIN sur le réseau »
-		qui se trouve sur le bureau, et uniquement dans ce dossier, sans quoi
-		vos données seront perdues une fois votre session fermée.
+Vous utilisez actuellement la station $(hostname).
 
-
+Veillez à enregistrer vos données personnelles dans le dossier :
+	« Documents de $LOGIN sur le réseau »
+qui se trouve sur le bureau, et uniquement dans ce dossier, sans quoi
+vos données seront perdues une fois votre session fermée.
 
 
 
@@ -610,13 +608,28 @@ function lancer_conky ()
 
 
 
-		Astuce : sur les stations Debian, déplacez la souris dans le coin
-		supérieur gauche ou appuyez la touche « logo » en bas à gauche du clavier
-		pour accéder aux bureaux, raccourcis et applications ouvertes. 
-		Un champ de recherche vous permet de trouver facilement applications 
-		et documents.
-		]];
-		FIN
+
+
+
+
+
+
+
+
+
+
+Astuce : sur les stations Debian, déplacez la souris dans le coin
+supérieur gauche ou appuyez la touche « logo » en bas à gauche du clavier
+pour accéder aux bureaux, raccourcis et applications ouvertes. 
+Un champ de recherche vous permet de trouver facilement applications 
+et documents.
+
+
+En cas de problème de proxy (accès impossible à un site web), aller dans les
+préférences de Firefox, rubrique «Général» et tout en bas de la page cliquer
+sur Paramètres, puis cocher « Détection automatique des paramètres de proxy... » 
+]];
+FIN
 
     # On fait de "$LOGIN" le propriétaire du fichier .conkyrc.
     chown "$LOGIN:" "$REP_HOME/.conkyrc"
