@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# SB le 17/04/2019
+
+CODENAME=$(lsb_release -c -s)
+
+# la valeur check-valid_until rendue nécessaire pour les mises à jour de jessie (passé dans archive) en avril 2019
+cat > /etc/apt/apt.conf<<EOF
+Acquire::http::Proxy "http://172.20.0.2:9999";
+Acquire::Check-Valid-Until "false";
+EOF
+
+# modif de l'adresse du dépot (anciennement en ftp) car jessie passé en archive en avril 2019
+if [ "${CODENAME}" = "jessie" ]; then
+    cat > /etc/apt/sources.list.d/jessie-backports.list<<EOF
+deb http://archive.debian.org/debian jessie-backports main contrib
+EOF
+
+fi
+
