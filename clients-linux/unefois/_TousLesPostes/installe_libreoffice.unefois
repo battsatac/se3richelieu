@@ -8,7 +8,7 @@ echo Installation de LibreOffice sur $DISTRIB-$CODENAME
 if [ "$DISTRIB" == "Debian" ]; then
 
     cat > /etc/apt/sources.list.d/${CODENAME}-backports.list <<EOF
-deb http://ftp.debian.org/debian ${CODENAME}-backports main
+deb http://archive.debian.org/debian ${CODENAME}-backports main
 EOF
     apt-get update
     apt-get install -y -t ${CODENAME}-backports libreoffice

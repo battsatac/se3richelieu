@@ -118,11 +118,11 @@ function ouverture_perso ()
 
     # SB ajout du 03/07/2018 pour jurys de bac
     # Montage du partage public « jurybac » seulement pour le groupe Bac (le partage s'appelle bac)
-#    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Bac"; then
-#        monter_partage "//$SE3/bac" "Jury_bac" \
-#            "$REP_HOME/Bac" \
-#            "$REP_HOME/Bureau/Bac"
-#    fi
+    if est_dans_liste "$LISTE_GROUPES_LOGIN" "Bac"; then
+        monter_partage "//$SE3/Docs/Bac" "Jury_bac" \
+            "$REP_HOME/Bac" \
+            "$REP_HOME/Bureau/Bac"
+    fi
 
     # Traitement spécifique des profils professeurs
     if est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs"

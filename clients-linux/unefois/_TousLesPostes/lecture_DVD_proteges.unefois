@@ -13,7 +13,7 @@ apt-get install -y debconf-utils
 
 
 echo -e "* ajout et activation (-s) de jessie-backports contrib dans le source list\n"
-apt-add-repository -s "deb http://ftp.debian.org/debian jessie-backports contrib"
+apt-add-repository -s "deb http://archive.debian.org/debian jessie-backports contrib"
 
 echo -e "* mise à jour des dépots et installation\n"
 apt-get update
